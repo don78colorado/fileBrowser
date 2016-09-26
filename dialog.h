@@ -23,9 +23,11 @@ private slots:
 
     void on_treeView_clicked(const QModelIndex &index);
 
+    void on_fsModel_directoryLoaded(const QString &path);
 private:
     Ui::Dialog *ui;
     QFileSystemModel *m_fsModel;
+    QModelIndex m_pathIndex;
 
 };
 
