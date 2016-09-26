@@ -5,19 +5,21 @@
 Dialog::Dialog(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::Dialog),
-    m_fsModel(new QFileSystemModel(this))
+    m_fsModel(new QDirModel(this)),
+    m_loadCounter(0),
+    m_expandDepth(4)
     //m_pathIndex(new QModelIndex())
 {
     ui->setupUi(this);
-    QString homePath;
-    homePath=QDir::homePath();
-    qDebug() << homePath;
+
     //m_fsModel->setFilter(QDir::AllEntries); //expand will crash
     ui->treeView->setModel(m_fsModel);
     m_fsModel->setReadOnly(true); // read-only
-    cd(homePath);
+    m_fsModel->setSorting(m_fsModel->sorting() | QDir::DirsFirst);
+    cdHome();
     ui->treeView->setColumnWidth(0, 300);
-    connect(m_fsModel, SIGNAL(directoryLoaded(QString)), this, SLOT(on_fsModel_directoryLoaded(QString)));
+    //connect(m_fsModel, SIGNAL(directoryLoaded(QString)), this, SLOT(on_fsModel_directoryLoaded(QString)));
+
 }
 
 Dialog::~Dialog()
@@ -27,8 +29,10 @@ Dialog::~Dialog()
 
 void Dialog::cd(const QString &path)
 {
-    m_pathIndex = m_fsModel->setRootPath(path);
+    //m_pathIndex = m_fsModel->setRootPath(path);
+    m_pathIndex = m_fsModel->index(path);
     ui->treeView->setRootIndex(m_pathIndex);
+    on_fsModel_directoryLoaded(path);
 }
 
 void Dialog::on_fsModel_directoryLoaded(const QString &path)
@@ -67,8 +71,8 @@ void Dialog::expand(QModelIndex index, int depth)
 void Dialog::on_expandAllButton_clicked()
 {
    // expandAll
-    ui->treeView->expandToDepth(8);
-    //expand(m_pathIndex, 8);
+    //ui->treeView->expandToDepth(8);
+    expand(m_pathIndex, m_expandDepth);
 }
 
 void Dialog::on_collapseAllButton_clicked()
@@ -94,7 +98,32 @@ void Dialog::on_treeView_clicked(const QModelIndex &index)
 
 void Dialog::on_pushButton_clicked()
 {
+   cdUp();
+}
+
+void Dialog::cdHome()
+{
+    cd(QDir::homePath());
+}
+
+void Dialog::cdUp()
+{
+    QFileInfo fileInfo = m_fsModel->fileInfo(m_pathIndex);
+    QDir dir = fileInfo.dir();
+   //dir.cdUp();
+   cd(dir.absolutePath());
+}
+
+/* implementation for QFileSystemModel
+void Dialog::cdUp()
+{
    QDir dir = m_fsModel->rootDirectory();
    dir.cdUp();
    cd(dir.absolutePath());
+}
+*/
+
+void Dialog::on_pushButton_2_clicked()
+{
+   cdHome();
 }

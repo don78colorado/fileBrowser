@@ -3,6 +3,7 @@
 
 #include <QDialog>
 #include <QFileSystemModel>
+#include <QDirModel>
 
 namespace Ui {
 class Dialog;
@@ -27,12 +28,17 @@ private slots:
     void on_pushButton_clicked();
 
     void cd(const QString &path);
+    void cdUp();
+    void cdHome();
     void expand(QModelIndex index, int depth);
+    void on_pushButton_2_clicked();
+
 private:
     Ui::Dialog *ui;
-    QFileSystemModel *m_fsModel;
+    QDirModel *m_fsModel;
     QModelIndex m_pathIndex;
-    int m_loadCounter=0;
+    int m_loadCounter;
+    int m_expandDepth;
 
 };
 
